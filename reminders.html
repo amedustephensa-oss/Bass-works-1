@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reminders | ELeP</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<div id="mainNav"></div>
+<main class="py-4"><div class="container"><div class="row">
+  <div class="col-md-5 mb-3"><div class="card p-4 shadow-sm">
+    <h5>Set Reminder</h5><div id="reminderAlert" class="alert d-none"></div>
+    <form id="reminderForm">
+      <div class="form-group"><label>Message</label><input class="form-control" name="message" required></div>
+      <div class="form-group"><label>Remind At</label><input type="datetime-local" class="form-control" name="remind_at" required></div>
+      <button class="btn btn-primary btn-block">Save Reminder</button>
+    </form>
+  </div></div>
+  <div class="col-md-7 mb-3">
+    <div class="card p-4 shadow-sm mb-3"><h5>Deadline Alerts (Next 2 Days)</h5><div id="alerts"></div></div>
+    <div class="card p-4 shadow-sm"><h5>Your Reminder List</h5><div id="reminderList"></div></div>
+  </div>
+</div></div></main>
+<script src="assets/js/app.js"></script>
+<script>
+async function loadReminders() {
+  const data = await api.request('api/reminders.php');
+  document.getElementById('alerts').innerHTML = data.alerts.length
+    ? `<ul class="list-group list-group-flush">${data.alerts.map(a=>`<li class="list-group-item px-0 d-flex justify-content-between"><span>${a.title}</span><span class="badge badge-warning">Due ${a.deadline}</span></li>`).join('')}</ul>`
+    : '<p class="text-muted mb-0">No urgent deadlines 🎉</p>';
+  document.getElementById('reminderList').innerHTML = data.reminders.length
+    ? `<ul class="list-group list-group-flush">${data.reminders.map(r=>`<li class="list-group-item px-0 d-flex justify-content-between"><span>${r.message}</span><small>${r.remind_at}</small></li>`).join('')}</ul>`
+    : '<p class="text-muted mb-0">No reminders created yet.</p>';
+}
+
+(async () => {
+  await guardAuth();
+  await renderNav();
+  await loadReminders();
+  document.getElementById('reminderForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      await api.request('api/reminders.php', { method: 'POST', body: JSON.stringify({ message: fd.get('message'), remind_at: fd.get('remind_at') }) });
+      e.target.reset();
+      setAlert('reminderAlert', 'Reminder saved.', 'success');
+      loadReminders();
+    } catch (err) { setAlert('reminderAlert', err.message); }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+body {
+    background: #f5f7fb;
+}
+
+.card {
+    border: none;
+    border-radius: 0.75rem;
+}
+
+.hero {
+    background: linear-gradient(135deg, #0d6efd, #5a8dee);
+    color: #fff;
+    border-radius: 1rem;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.progress {
+    height: 0.75rem;
+}
