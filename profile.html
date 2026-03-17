@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | ELeP</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<div id="mainNav"></div>
+<main class="py-4"><div class="container"><div class="row justify-content-center"><div class="col-md-7"><div class="card p-4 shadow-sm">
+  <h3>Profile</h3><div id="profileAlert" class="alert d-none"></div>
+  <form id="profileForm">
+    <div class="form-group"><label>Full Name</label><input class="form-control" id="full_name" name="full_name" required></div>
+    <div class="form-group"><label>Email</label><input class="form-control" id="email" disabled></div>
+    <div class="form-group"><label>Joined</label><input class="form-control" id="joined" disabled></div>
+    <button class="btn btn-primary">Update Profile</button>
+  </form>
+</div></div></div></div></main>
+<script src="assets/js/app.js"></script>
+<script>
+(async () => {
+  await guardAuth();
+  await renderNav();
+  const data = await api.request('api/profile.php');
+  document.getElementById('full_name').value = data.user.full_name;
+  document.getElementById('email').value = data.user.email;
+  document.getElementById('joined').value = data.user.created_at;
+
+  document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await api.request('api/profile.php', { method: 'PUT', body: JSON.stringify({ full_name: document.getElementById('full_name').value }) });
+      setAlert('profileAlert', 'Profile updated successfully.', 'success');
+    } catch (err) { setAlert('profileAlert', err.message); }
+  });
+})();
+</script>
+</body>
+</html>
